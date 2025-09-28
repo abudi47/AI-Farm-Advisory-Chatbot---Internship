@@ -19,8 +19,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     const addMessage = (message: ChatMessage) => {
-        setMessages((prevMessages) => [...prevMessages, message]);
-        localStorage.setItem("chat-messages", JSON.stringify([...messages, message]));
+        setMessages((prevMessages) => {
+          localStorage.setItem("chat-messages", JSON.stringify([...prevMessages, message]));
+          return [...prevMessages, message]
+        });
     };
 
     useEffect(() => {
