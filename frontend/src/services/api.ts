@@ -10,6 +10,14 @@ export interface ChatMessage {
   sources?: string[];
 }
 
+export interface Document {
+  id: string;
+  filename: string;
+  upload_date: string;
+  status: 'pending' | 'embedded' | 'failed';
+  size: number;
+}
+
 export interface ChatResponse {
   answer: string;
   sources: string[];
@@ -67,21 +75,84 @@ export async function sendMessage(
   }
 }
 
-export async function uploadDocument(file: File): Promise<void> {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
+export async function uploadPdfToCloudinary(file: File): Promise<string> {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-    const response = await fetch(`${API_BASE_URL}/embed`, {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+    {
       method: "POST",
       body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload PDF to Cloudinary");
+  }
+
+  const data = await response.json();
+  return data.secure_url;
+}
+
+
+export async function uploadDocumentUrlToBackend(url: string, filename: string): Promise<void> {
+  const token = localStorage.getItem('admin_token');
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ file_url: url, filename }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to register document in backend");
+  }
+}
+
+
+export async function triggerEmbedding(documentId: string): Promise<void> {
+  try {
+    const token = localStorage.getItem('admin_token');
+    const response = await fetch(`${API_BASE_URL}/admin/documents/${documentId}/embed`, {
+      method: "POST",
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.error("Error uploading document:", error);
-    throw new Error("Failed to upload document");
+    console.error("Error triggering embedding:", error);
+    throw new Error("Failed to trigger embedding");
+  }
+}
+
+
+export async function getDocuments(): Promise<Document[]> {
+  try {
+    const token = localStorage.getItem('admin_token');
+    const response = await fetch(`${API_BASE_URL}/admin/documents`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    throw new Error("Failed to fetch documents");
   }
 }

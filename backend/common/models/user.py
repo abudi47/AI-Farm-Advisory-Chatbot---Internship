@@ -10,3 +10,4 @@ class User(Base):
     location = Column(String)
     email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String)
+    is_admin = Column(Integer, default=0)  # <-- This must exist!

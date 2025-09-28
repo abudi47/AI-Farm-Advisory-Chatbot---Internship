@@ -4,7 +4,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { useToast } from "@/hooks/use-toast";
-import { sendMessage, uploadDocument, ChatMessage as ChatMessageType } from "@/services/api";
+import { sendMessage, ChatMessage as ChatMessageType } from "@/services/api";
 import { Sprout, MessageCircle } from "lucide-react";
 import { useTranslations } from "@/hooks/useTranslations";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -113,7 +113,7 @@ const Index = () => {
     setIsUploading(true);
     
     try {
-      await uploadDocument(file);
+      // await uploadDocument(file);
       toast({
         title: t.documentUploaded,
         description: `${file.name} ${t.documentUploadedDescription}`,
