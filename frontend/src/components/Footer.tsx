@@ -54,7 +54,7 @@ export function Footer() {
               <div className="text-sm opacity-90">🇪🇹 አማርኛ (Amharic)</div>
               <div className="text-sm opacity-90">🇪🇹 Afaan Oromo</div>
               <div className="text-sm opacity-90">🇪🇹 ትግርኛ (Tigrigna)</div>
-              <div className="text-sm opacity-90">🇸🇴 Soomaali (Somali)</div>
+              <div className="text-sm opacity-90">🇪🇹 Soomaali (Somali)</div>
             </div>
           </div>
         </div>
