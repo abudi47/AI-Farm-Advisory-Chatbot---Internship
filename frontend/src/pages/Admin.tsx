@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { uploadDocumentUrlToBackend } from "@/services/api";
 import {
   Table,
   TableBody,
@@ -130,12 +131,13 @@ const AdminDashboard: React.FC = () => {
   const file = event.target.files?.[0];
   if (!file) return;
   setIsUploading(true);
-  try {
-    // 1. Upload to Cloudinary
-    const url = await uploadPdfToCloudinary(file);
 
-    // 2. Register in backend
-    // await uploadDocumentUrlToBackend(url, file.name);
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append('filename', file.name);
+
+    await uploadDocumentUrlToBackend(formData);
 
     toast({ title: "Success", description: "PDF uploaded and registered!" });
     loadDocuments();
@@ -307,6 +309,7 @@ const Admin: React.FC = () => {
 };
 
 export default Admin;
+
 function uploadPdfToCloudinary(file: File) {
     throw new Error("Function not implemented.");
 }

@@ -3,17 +3,24 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
+import os
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from common.models.user import User as UserModel
 from common.models.db import get_db
 from common.models.document import Document 
 from sqlalchemy import func
+from services.ingestion.embed_and_store import embed_and_store
 
 
 SECRET_KEY = "4340aa99705e93cda93f400b78f61f56bc671ce6c23bda8235803c098832abb7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+parent_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+UPLOAD_DIRECTORY = os.path.join(parent_path, "services/ingestion/raw")
+os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+print(f"Upload directory: {UPLOAD_DIRECTORY}")
 
 class Token(BaseModel):
     access_token: str
@@ -167,22 +174,25 @@ from fastapi import UploadFile, File
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
+    filename: str = '',
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user)
 ):
-    # Save file and create Document entry
-    contents = await file.read()
-    filename = file.filename
-    size = len(contents)
-    # Save file to disk or cloud here if needed
-    doc = Document(
-        src_file_name=filename,
-        content=contents.decode("utf-8", errors="ignore"),  # or save as binary
-        status="pending",
-        size=size,
-    )
-    db.add(doc)
-    db.commit()
-    db.refresh(doc)
-    return {"id": doc.id, "filename": doc.src_file_name, "status": doc.status}
+    if not file:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+    
+    print(f"Received file: {file.filename}, size: ")
+    
+    try:
+        file_path = os.path.join(UPLOAD_DIRECTORY, filename or file.filename)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        
+        await embed_and_store(file_path, title=filename or file.filename)
 
+        return {"id": "doc.id", "filename": "doc.src_file_name", "status": "doc.status"}
+        
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
+    
