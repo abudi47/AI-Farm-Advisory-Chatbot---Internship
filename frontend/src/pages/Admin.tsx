@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
-  uploadDocument,
+//   uploadDocument,
   getDocuments,
   triggerEmbedding,
   type Document,
@@ -135,7 +135,7 @@ const AdminDashboard: React.FC = () => {
     const url = await uploadPdfToCloudinary(file);
 
     // 2. Register in backend
-    await uploadDocumentUrlToBackend(url, file.name);
+    // await uploadDocumentUrlToBackend(url, file.name);
 
     toast({ title: "Success", description: "PDF uploaded and registered!" });
     loadDocuments();
