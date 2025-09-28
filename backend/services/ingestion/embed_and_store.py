@@ -49,7 +49,8 @@ async def embed_and_store(file_path: str, title: str = None):
                 content=chunk,
                 doc_metadata={"source": file_path},
                 src_file_name=filename_with_extension,
-                embedding=embedding
+                embedding=embedding,
+                status="embedded",
             )
             db.add(doc)
         
