@@ -26,7 +26,7 @@ const Landing = () => {
       <header className="bg-gradient-agricultural text-primary-foreground shadow-soft">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 cursor-pointer">
               <div className="p-2 bg-white/20 rounded-full flex items-center justify-center shadow-md border border-white/30">
                 <img
                   src="https://media.licdn.com/dms/image/v2/D4D22AQGj5t6Y0g1b0A/feedshare-shrink_800/B4DZjBQEZCH0Ak-/0/1755588873204?e=2147483647&v=beta&t=iXO-x02SRlPPdrUE6waOyOIvApyAKMorgawcmEuj0CY"
