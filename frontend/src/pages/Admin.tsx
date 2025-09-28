@@ -66,7 +66,7 @@ const LoginForm: React.FC = () => {
           <CardTitle className="text-center">Admin Login</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input

@@ -41,7 +41,7 @@ interface Translations {
 
 const translations: Record<string, Translations> = {
   en: {
-    title: "Nile Care AI Farm Advisory",
+    title: "Nile Tech AI Farm Advisory",
     subtitle: "Your intelligent farming assistant",
     heroTitle: "Transform Your Farm with",
     heroHighlight: "AI-Powered Advice",
