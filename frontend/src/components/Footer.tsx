@@ -61,7 +61,7 @@ export function Footer() {
 
         <div className="border-t border-white/20 mt-8 pt-8 text-center">
           <p className="text-sm opacity-80">
-            © 2024 Nile Care AI Farm Advisory. All rights reserved. Powered by AI for sustainable agriculture.
+            © 2025 Nile Care AI Farm Advisory. All rights reserved. Powered by AI for sustainable agriculture.
           </p>
         </div>
       </div>
