@@ -116,8 +116,8 @@ async def ask_question(request: AskRequest, db: Session = Depends(get_db)):
     
     answer = clean_text(answer)
     
-    if request.lang != "en":
-        answer = await google_translate(answer, src_lang="en", dest_lang=request.lang)
+    if request.lang != "en" or question_lang != "en":
+        answer = await google_translate(answer, src_lang="en", dest_lang=question_lang or "en")
     
     # print("Question:", english_question)
     # print("Context:", context)
