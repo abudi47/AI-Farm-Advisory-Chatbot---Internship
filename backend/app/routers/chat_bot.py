@@ -57,6 +57,51 @@ async def ask_question(request: AskRequest, db: Session = Depends(get_db)):
         src_lang = request.lang if request.lang != "auto" else question_lang
         english_question = await google_translate(request.question, src_lang=src_lang, dest_lang="en")
 
+    # Handle greetings and simple interactions without database query
+    question_lower = english_question.lower().strip()
+    greeting_patterns = [
+        "hi", "hello", "hey", "greetings", "good morning", "good afternoon", 
+        "good evening", "howdy", "hola", "salut", "namaste",
+        "how are you", "how r u", "how do you do", "what's up", "whats up",
+        "sup", "wassup", "how's it going", "hows it going"
+    ]
+    intro_patterns = [
+        "who are you", "what are you", "who am i talking to", "what is your name",
+        "introduce yourself", "tell me about yourself"
+    ]
+    thanks_patterns = ["thank", "thanks", "thx", "appreciate"]
+    
+    # Check for greetings
+    if any(pattern in question_lower for pattern in greeting_patterns) and len(question_lower.split()) <= 5:
+        greeting_response = (
+            "Hello! I'm Nile Care AI Farm Advisory, your agricultural assistant. "
+            "I'm here to help answer your farming questions, provide crop advice, "
+            "discuss pest management, soil health, weather impacts, and more. "
+            "How can I assist you today?"
+        )
+        if request.lang != "en" and question_lang != "en":
+            greeting_response = await google_translate(greeting_response, src_lang="en", dest_lang=question_lang)
+        return AskResponse(answer=greeting_response, sources=[])
+    
+    # Check for introductions
+    if any(pattern in question_lower for pattern in intro_patterns):
+        intro_response = (
+            "I am Nile Care AI Farm Advisory, your trusted agricultural assistant. "
+            "I'm designed to help farmers and agricultural professionals with farming-related queries, "
+            "provide guidance on crop management, pest control, soil health, weather conditions, "
+            "and offer tailored advice based on agricultural best practices. "
+            "What would you like to know about farming?"
+        )
+        if request.lang != "en" and question_lang != "en":
+            intro_response = await google_translate(intro_response, src_lang="en", dest_lang=question_lang)
+        return AskResponse(answer=intro_response, sources=[])
+    
+    # Check for thanks
+    if any(pattern in question_lower for pattern in thanks_patterns) and len(question_lower.split()) <= 5:
+        thanks_response = "You're welcome! Feel free to ask me anything about farming and agriculture."
+        if request.lang != "en" and question_lang != "en":
+            thanks_response = await google_translate(thanks_response, src_lang="en", dest_lang=question_lang)
+        return AskResponse(answer=thanks_response, sources=[])
 
     # Embed the question
     query_embedding = await single_embed(english_question)

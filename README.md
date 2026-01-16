@@ -66,7 +66,7 @@ $ npm run dev
 ```
 ### 4. Ingest agricultural documents
 ```bash
-$ python main.py embed_and_store_cmd  path/to/your/document.pdf --title "Document Title"
+$ python main.py embed-and-store path/to/your/document.pdf --title "Document Title"
 ```
 
 ### 5. Access the application
