@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '')).replace(/\/$/, '');
 
 interface User {
   id: string;
@@ -41,6 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (token: string) => {
     try {
+      if (!API_BASE_URL) {
+        throw new Error('VITE_API_BASE_URL is not set for this build.');
+      }
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,6 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
   try {
+    if (!API_BASE_URL) {
+      throw new Error('VITE_API_BASE_URL is not set for this build.');
+    }
     const response = await fetch(`${API_BASE_URL}/token`, {
       method: 'POST',
       headers: {

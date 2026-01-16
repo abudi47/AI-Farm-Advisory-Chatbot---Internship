@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from common.models.db import get_db
 from common.models.document import Document
 from common.config import settings
@@ -23,6 +24,7 @@ class AskResponse(BaseModel):
     sources: list
     
 lang_map = {
+    "auto": "Auto",
     "en": "English",
     "am": "Amharic",
     "om": "Affan Oromo",
@@ -52,14 +54,41 @@ async def ask_question(request: AskRequest, db: Session = Depends(get_db)):
     question_lang = await detect_language(english_question)
     
     if question_lang != "en":
-        english_question = await google_translate(request.question, src_lang=request.lang, dest_lang="en")
+        src_lang = request.lang if request.lang != "auto" else question_lang
+        english_question = await google_translate(request.question, src_lang=src_lang, dest_lang="en")
 
 
     # Embed the question
     query_embedding = await single_embed(english_question)
     
     # Retrieve relevant chunks from the database
-    result = db.query(Document).order_by(Document.embedding.cosine_distance(query_embedding)).limit(settings.k_retrieval).all()
+    try:
+        result = (
+            db.query(Document)
+            .order_by(Document.embedding.cosine_distance(query_embedding))
+            .limit(settings.k_retrieval)
+            .all()
+        )
+    except SQLAlchemyError as e:
+        # Check if this is a connection error (IPv6, network, auth, etc.)
+        root_err = getattr(e, "orig", e)
+        err_msg = str(root_err).lower()
+        
+        if "network is unreachable" in err_msg or "connection" in err_msg:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Unable to connect to the database. This may be due to network issues, "
+                    "IPv6 connectivity problems, or incorrect database credentials. "
+                    "For local development, consider setting up a local PostgreSQL instance. "
+                    "For Supabase, use the Connection Pooler host instead of the direct database host."
+                ),
+            ) from e
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Database error: {str(root_err)[:200]}",
+            ) from e
 
     context = "\n\n".join([doc.content for doc in result])
     if not context.strip():
@@ -104,7 +133,7 @@ async def ask_question(request: AskRequest, db: Session = Depends(get_db)):
     prompt = f"""Use the following context to answer the
 
     question: {english_question}
-    user language: {lang_map[request.lang]} just to be clear use english for the answer whatever the user language is.
+    user language: {lang_map.get(request.lang, 'English')} just to be clear use english for the answer whatever the user language is.
 
     Context:
     {context}

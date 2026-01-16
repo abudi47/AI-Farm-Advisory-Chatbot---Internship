@@ -44,9 +44,10 @@ async def embed_and_store(file_path: str, title: str = None):
             return
         
         for chunk, embedding in zip(chunks, embeddings):
+            clean_chunk = chunk.replace("\x00", "")  # drop NULs that break Postgres inserts
             doc = Document(
                 title=title or os.path.basename(file_path),
-                content=chunk,
+                content=clean_chunk,
                 doc_metadata={"source": file_path},
                 src_file_name=filename_with_extension,
                 embedding=embedding,

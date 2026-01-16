@@ -39,7 +39,18 @@ A beautiful, modern React frontend for the AI Farm Advisory Chatbot with multili
 
 ## 🔧 Backend Connection
 
-The frontend expects your FastAPI backend to be running on `http://localhost:8000` with these endpoints:
+The frontend uses the `VITE_API_BASE_URL` environment variable as the backend base URL.
+
+- **Development**: if `VITE_API_BASE_URL` is not set, it falls back to `http://localhost:8000`.
+- **Production build**: you must set `VITE_API_BASE_URL` (otherwise the app will not be able to reach the backend).
+
+Example `.env` for the frontend:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+The backend should expose these endpoints:
 
 - `POST /ask` - Send agricultural questions
   ```json
@@ -133,7 +144,8 @@ If you see "Failed to get response from the server":
 
 1. Verify backend is running: `curl http://localhost:8000/docs`
 2. Check console for CORS errors
-3. Ensure backend allows `localhost:8080` origin
+3. Ensure `VITE_API_BASE_URL` points to the correct backend URL
+4. Ensure backend CORS allows your frontend origin (or uses `Access-Control-Allow-Origin: *` without cookies)
 
 ### Common Issues
 

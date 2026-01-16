@@ -1,7 +1,9 @@
 // const API_BASE_URL = "http://localhost:8000";
 // filepath: frontend/src/services/api.ts
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-console.log(API_BASE_URL)
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? "http://localhost:8000" : "")
+).replace(/\/$/, "");
 export interface ChatMessage {
   id: string;
   text: string;
@@ -47,6 +49,9 @@ export async function sendMessage(
   longitude: number = null
 ): Promise<ChatResponse> {
   try {
+    if (!API_BASE_URL) {
+      throw new Error("VITE_API_BASE_URL is not set for this build.");
+    }
     const response = await fetch(`${API_BASE_URL}/ask`, {
       method: "POST",
       headers: {
@@ -62,16 +67,30 @@ export async function sendMessage(
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let detail = "";
+      try {
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const body = await response.json();
+          detail = body?.detail ? String(body.detail) : JSON.stringify(body);
+        } else {
+          detail = await response.text();
+        }
+      } catch {
+        // ignore parse errors
+      }
+      const suffix = detail ? ` - ${detail}` : "";
+      throw new Error(`HTTP error! status: ${response.status}${suffix}`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("Error sending message:", error);
-    throw new Error(
-      "Failed to get response from the server. Please check if the backend is running at http://localhost:8000"
-    );
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to reach the server at ${API_BASE_URL}`);
   }
 }
 

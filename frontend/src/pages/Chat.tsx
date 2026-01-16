@@ -97,7 +97,7 @@ const Index = () => {
       
       const errorMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having trouble connecting to the server. Please make sure the backend is running at http://localhost:8000 and try again.",
+        text: "Sorry, I'm having trouble connecting to the server. Please check the backend URL/config and try again.",
         isUser: false,
         timestamp: new Date(),
       };
