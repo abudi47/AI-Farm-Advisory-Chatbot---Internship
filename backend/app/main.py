@@ -7,7 +7,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust as needed for production
+    allow_origins=[
+        "https://ai-farm-advisory-chatbot-internship.vercel.app"
+    ],  # Adjust as needed for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
