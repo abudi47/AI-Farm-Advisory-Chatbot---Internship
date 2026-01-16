@@ -21,10 +21,6 @@ cors_origin_regex = (settings.cors_origin_regex or "").strip() or None
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://ai-farm-advisory-chatbot-internship.vercel.app"
-    ],  # Adjust as needed for production
-    allow_credentials=True,
     allow_origins=cors_origins,
     allow_origin_regex=cors_origin_regex,
     # NOTE: Browsers disallow `Access-Control-Allow-Origin: *` when credentials are allowed.
